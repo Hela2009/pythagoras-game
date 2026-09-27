@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pythagoras — The Triangle Quest</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f4f1e8;
+        color: #101828;
+        min-height: 100vh;
+    }
+
+    button,
+    input {
+        font-family: inherit;
+    }
+
+    /* =========================
+       START SCREEN
+    ========================= */
+
+    .screen {
+        min-height: 100vh;
+        display: none;
+    }
+
+    .screen.active {
+        display: flex;
+    }
+
+    #startScreen {
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        background:
+            radial-gradient(circle at 20% 20%, #dbe8f4 0, transparent 30%),
+            radial-gradient(circle at 80% 80%, #e8dfc7 0, transparent 30%),
+            #f4f1e8;
+    }
+
+    .start-card {
+        width: 100%;
+        max-width: 850px;
+        background: white;
+        border: 1px solid #d8d3c7;
+        padding: 55px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+
+    .eyebrow {
+        font-size: 12px;
+        letter-spacing: 4px;
+        color: #315d7c;
+        font-weight: bold;
+        margin-bottom: 18px;
+    }
+
+    .start-card h1 {
+        font-family: Georgia, serif;
+        font-size: clamp(42px, 8vw, 80px);
+        line-height: 0.95;
+        margin-bottom: 18px;
+    }
+
+    .start-card h1 span {
+        color: #315d7c;
+    }
+
+    .subtitle {
+        font-family: Georgia, serif;
+        font-size: 22px;
+        font-style: italic;
+        margin-bottom: 35px;
+        color: #555;
+    }
+
+    .pythagoras-face {
+        font-size: 75px;
+        margin-bottom: 20px;
+    }
+
+    .start-info {
+        display: flex;
+        justify-content: center;
+        gap: 35px;
+        flex-wrap: wrap;
+        margin-bottom: 35px;
+        color: #555;
+    }
+
+    .start-info strong {
+        display: block;
+        color: #101828;
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+
+    .start-button {
+        border: none;
+        background: #101828;
+        color: white;
+        padding: 17px 38px;
+        font-size: 15px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .start-button:hover {
+        background: #315d7c;
+        transform: translateY(-2px);
+    }
+
+    /* =========================
+       GAME SCREEN
+    ========================= */
+
+    #gameScreen {
+        flex-direction: column;
+        background: #f4f1e8;
+    }
+
+    .topbar {
+        width: 100%;
+        background: #101828;
+        color: white;
+        padding: 15px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .logo {
+        font-family: Georgia, serif;
+        font-size: 20px;
+    }
+
+    .stats {
+        display: flex;
+        gap: 25px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .game-container {
+        width: 100%;
+        max-width: 1000px;
+        margin: auto;
+        padding: 35px 20px 50px;
+    }
+
+    .progress-area {
+        margin-bottom: 25px;
+    }
+
+    .progress-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: bold;
+        color: #555;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: #ddd8cc;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 25%;
+        background: #315d7c;
+        transition: width 0.3s;
+    }
+
+    .question-card {
+        background: white;
+        border: 1px solid #d8d3c7;
+        padding: 45px;
+        text-align: center;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+    }
+
+    .level-label {
+        color: #315d7c;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 3px;
+        margin-bottom: 15px;
+    }
+
+    .question-card h2 {
+        font-family: Georgia, serif;
+        font-size: clamp(28px, 5vw, 45px);
+        margin-bottom: 30px;
+    }
+
+    .triangle {
+        position: relative;
+        width: 230px;
+        height: 180px;
+        margin: 10px auto 35px;
+    }
+
+    .triangle svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .answers {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+        max-width: 550px;
+        margin: auto;
+    }
+
+    .answer-button {
+        background: #f8f6f0;
+        border: 2px solid #d8d3c7;
+        padding: 17px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .answer-button:hover {
+        border-color: #315d7c;
+        background: #edf3f7;
+    }
+
+    .answer-button.correct {
+        background: #dcefe2;
+        border-color: #4d8a61;
+    }
+
+    .answer-button.wrong {
+        background: #f5dddd;
+        border-color: #a84d4d;
+    }
+
+    .number-input {
+        display: block;
+        width: 220px;
+        margin: 0 auto 15px;
+        padding: 15px;
+        text-align: center;
+        border: 2px solid #d8d3c7;
+        font-size: 20px;
+        outline: none;
+    }
+
+    .number-input:focus {
+        border-color: #315d7c;
+    }
+
+    .submit-button {
+        border: none;
+        background: #101828;
+        color: white;
+        padding: 15px 30px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .submit-button:hover {
+        background: #315d7c;
+    }
+
+    .formula {
+        font-family: Georgia, serif;
+        font-size: 45px;
+        margin: 30px 0;
+        color: #315d7c;
+    }
+
+    .feedback {
+        min-height: 30px;
+        margin-top: 25px;
+        font-weight: bold;
+        font-size: 17px;
+    }
+
+    .feedback.correct-text {
+        color: #3f7951;
+    }
+
+    .feedback.wrong-text {
+        color: #a84d4d;
+    }
+
+    .next-button {
+        display: none;
+        margin: 20px auto 0;
+        border: none;
+        background: #315d7c;
+        color: white;
+        padding: 14px 30px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* =========================
+       RESULT SCREEN
+    ========================= */
+
+    #resultScreen {
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+        background:
+            radial-gradient(circle at 30% 20%, #dbe8f4 0, transparent 30%),
+            #f4f1e8;
+    }
+
+    .result-card {
+        width: 100%;
+        max-width: 650px;
+        background: white;
+        border: 1px solid #d8d3c7;
+        padding: 55px 35px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+
+    .result-emoji {
+        font-size: 75px;
+        margin-bottom: 15px;
+    }
+
+    .result-card h1 {
+        font-family: Georgia, serif;
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+
+    .result-score {
+        font-size: 28px;
+        font-weight: bold;
+        color: #315d7c;
+        margin: 20px 0;
+    }
+
+    .result-card p {
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 650px) {
+
+        .start-card {
+            padding: 35px 20px;
+        }
+
+        .stats {
+            width: 100%;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .topbar {
+            padding: 14px 15px;
+        }
+
+        .question-card {
+            padding: 30px 18px;
+        }
+
+        .answers {
+            grid-template-columns: 1fr;
+        }
+
+        .formula {
+            font-size: 34px;
+        }
+    }
+</style>
+</head>
+
+
+<body>
+
+<!-- =========================
+     START SCREEN
+========================= -->
+
+<section id="startScreen" class="screen active">
+
+    <div class="start-card">
+
+        <div class="pythagoras-face">🏛️</div>
+
+        <div class="eyebrow">
+            PYTHAGORAS PRESENTS
+        </div>
+
+        <h1>
+            THE <span>TRIANGLE</span><br>
+            QUEST
+        </h1>
+
+        <div class="subtitle">
+            Think. Calculate. Conquer the triangle.
+        </div>
+
+        <div class="start-info">
+
+            <div>
+                <strong>4</strong>
+                Levels
+            </div>
+
+            <div>
+                <strong>3 ❤️</strong>
+                Lives
+            </div>
+
+            <div>
+                <strong>XP</strong>
+                Earn points
+            </div>
+
+        </div>
+
+        <button class="start-button" onclick="startGame()">
+            START THE QUEST →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     GAME SCREEN
+========================= -->
+
+<section id="gameScreen" class="screen">
+
+    <div class="topbar">
+
+        <div class="logo">
+            PYTHAGORAS
+        </div>
+
+        <div class="stats">
+
+            <div>
+                ❤️ <span id="lives">3</span>
+            </div>
+
+            <div>
+                ⭐ <span id="xp">0</span> XP
+            </div>
+
+            <div>
+                🔥 <span id="streak">0</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="game-container">
+
+        <div class="progress-area">
+
+            <div class="progress-top">
+                <span id="levelText">LEVEL 1 / 4</span>
+                <span id="scoreText">SCORE: 0</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+        </div>
+
+
+        <div class="question-card">
+
+            <div class="level-label" id="levelLabel">
+                LEVEL 1
+            </div>
+
+            <h2 id="question">
+                Loading...
+            </h2>
+
+            <div id="questionContent"></div>
+
+            <div id="feedback" class="feedback"></div>
+
+            <button
+                id="nextButton"
+                class="next-button"
+                onclick="nextLevel()">
+                NEXT →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     RESULT SCREEN
+========================= -->
+
+<section id="resultScreen" class="screen">
+
+    <div class="result-card">
+
+        <div class="result-emoji" id="resultEmoji">
+            🏆
+        </div>
+
+        <h1 id="resultTitle">
+            Quest Complete!
+        </h1>
+
+        <div class="result-score">
+            <span id="finalScore">0</span> points
+        </div>
+
+        <p id="resultMessage">
+            You survived the Triangle Quest.
+        </p>
+
+        <button class="start-button" onclick="restartGame()">
+            PLAY AGAIN →
+        </button>
+
+    </div>
+
+</section>
+
+
+<script>
+
+/* =========================================
+   GAME VARIABLES
+========================================= */
+
+let currentLevel = 1;
+let score = 0;
+let xp = 0;
+let lives = 3;
+let streak = 0;
+
+let answered = false;
+let currentAnswer = null;
+
+
+/* =========================================
+   START GAME
+========================================= */
+
+function startGame() {
+
+    currentLevel = 1;
+    score = 0;
+    xp = 0;
+    lives = 3;
+    streak = 0;
+
+    document.getElementById("startScreen").classList.remove("active");
+    document.getElementById("resultScreen").classList.remove("active");
+    document.getElementById("gameScreen").classList.add("active");
+
+    updateStats();
+    loadLevel();
+
+}
+
+
+/* =========================================
+   LOAD LEVEL
+========================================= */
+
+function loadLevel() {
+
+    answered = false;
+    currentAnswer = null;
+
+    document.getElementById("feedback").textContent = "";
+    document.getElementById("feedback").className = "feedback";
+
+    document.getElementById("nextButton").style.display = "none";
+
+    document.getElementById("levelText").textContent =
+        "LEVEL " + currentLevel + " / 4";
+
+    document.getElementById("levelLabel").textContent =
+        "LEVEL " + currentLevel;
+
+    document.getElementById("progressFill").style.width =
+        ((currentLevel - 1) / 4 * 100) + "%";
+
+
+    if (currentLevel === 1) {
+
+        levelOne();
+
+    } else if (currentLevel === 2) {
+
+        levelTwo();
+
+    } else if (currentLevel === 3) {
+
+        levelThree();
+
+    } else if (currentLevel === 4) {
+
+        levelFour();
+
+    }
+
+}
+
+
+/* =========================================
+   LEVEL 1
+========================================= */
+
+function levelOne() {
+
+    document.getElementById("question").textContent =
+        "A triangle has sides 3 cm and 4 cm. What is the hypotenuse?";
+
+    currentAnswer = 5;
+
+    document.getElementById("questionContent").innerHTML = `
+
+        <div class="triangle">
+
+            <svg viewBox="0 0 230 180">
+
+                <polygon
+                    points="35,150 35,30 200,150"
+                    fill="none"
+                    stroke="#315d7c"
+                    stroke-width="4"/>
+
+                <text
+                    x="18"
+                    y="95"
+                    font-size="16"
+                    fill="#101828">
+                    3
+                </text>
+
+                <text
+                    x="112"
+                    y="170"
+                    font-size="16"
+                    fill="#101828">
+                    4
+                </text>
+
+                <text
+                    x="115"
+                    y="80"
+                    font-size="16"
+                    fill="#315d7c">
+                    ?
+                </text>
+
+            </svg>
+
+        </div>
+
+        <div class="answers">
+
+            <button class="answer-button"
+                onclick="answerMultipleChoice(4, this)">
+                4 cm
+            </button>
+
+            <button class="answer-button"
+                onclick="answerMultipleChoice(5, this)">
+                5 cm
+            </button>
+
+            <button class="answer-button"
+                onclick="answerMultipleChoice(6, this)">
+                6 cm
+            </button>
+
+            <button class="answer-button"
+                onclick="answerMultipleChoice(7, this)">
+                7 cm
+            </button>
+
+        </div>
+    `;
+}
+
+
+/* =========================================
+   LEVEL 2
+========================================= */
+
+function levelTwo() {
+
+    const triangles = [
+        {a: 3, b: 4, c: 5},
+        {a: 5, b: 12, c: 13},
+        {a: 6, b: 8, c: 10},
+        {a: 8, b: 15, c: 17}
+    ];
+
+    const triangle =
+        triangles[Math.floor(Math.random() * triangles.length)];
+
+    currentAnswer = triangle.c;
+
+    document.getElementById("question").textContent =
+        "Find the hypotenuse.";
+
+    document.getElementById("questionContent").innerHTML = `
+
+        <div class="formula">
+            ${triangle.a}² + ${triangle.b}² = c²
+        </div>
+
+        <p style="margin-bottom:25px;color:#666;">
+            What is <strong>c</strong>?
+        </p>
+
+        <input
+            id="answerInput"
+            class="number-input"
+            type="number"
+            placeholder="Enter c">
+
+        <button
+            class="submit-button"
+            onclick="checkInputAnswer()">
+            CHECK ANSWER
+        </button>
+
+    `;
+
+    document.getElementById("answerInput").focus();
+}
+
+
+/* =========================================
+   LEVEL 3
+========================================= */
+
+function levelThree() {
+
+    const triangles = [
+        {a: 5, b: 12, c: 13},
+        {a: 8, b: 15, c: 17},
+        {a: 7, b: 24, c: 25},
+        {a: 9, b: 12, c: 15}
+    ];
+
+    const triangle =
+        triangles[Math.floor(Math.random() * triangles.length)];
+
+    currentAnswer = triangle.b;
+
+    document.getElementById("question").textContent =
+        "One side is missing. Find it.";
+
+    document.getElementById("questionContent").innerHTML = `
+
+        <div class="formula">
+            ${triangle.a}² + ?² = ${triangle.c}²
+        </div>
+
+        <p style="margin-bottom:25px;color:#666;">
+            What is the missing side?
+        </p>
+
+        <input
+            id="answerInput"
+            class="number-input"
+            type="number"
+            placeholder="Enter answer">
+
+        <button
+            class="submit-button"
+            onclick="checkInputAnswer()">
+            CHECK ANSWER
+        </button>
+
+    `;
+
+    document.getElementById("answerInput").focus();
+}
+
+
+/* =========================================
+   LEVEL 4
+========================================= */
+
+function levelFour() {
+
+    currentAnswer = "a²+b²=c²";
+
+    document.getElementById("question").textContent =
+        "Complete Pythagoras' famous formula.";
+
+    document.getElementById("questionContent").innerHTML = `
+
+        <div class="formula">
+            a² + b² = ?
+        </div>
+
+        <div class="answers">
+
+            <button class="answer-button"
+                onclick="answerFormula('c²', this)">
+                c²
+            </button>
+
+            <button class="answer-button"
+                onclick="answerFormula('a²', this)">
+                a²
+            </button>
+
+            <button class="answer-button"
+                onclick="answerFormula('b²', this)">
+                b²
+            </button>
+
+            <button class="answer-button"
+                onclick="answerFormula('2c', this)">
+                2c
+            </button>
+
+        </div>
+    `;
+}
+
+
+/* =========================================
+   MULTIPLE CHOICE
+========================================= */
+
+function answerMultipleChoice(answer, button) {
+
+    if (answered) return;
+
+    answered = true;
+
+    if (answer === currentAnswer) {
+
+        button.classList.add("correct");
+
+        correctAnswer();
+
+    } else {
+
+        button.classList.add("wrong");
+
+        wrongAnswer();
+
+    }
+}
+
+
+/* =========================================
+   FORMULA
+========================================= */
+
+function answerFormula(answer, button) {
+
+    if (answered) return;
+
+    answered = true;
+
+    if (answer === "c²") {
+
+        button.classList.add("correct");
+
+        correctAnswer();
+
+    } else {
+
+        button.classList.add("wrong");
+
+        wrongAnswer();
+
+    }
+}
+
+
+/* =========================================
+   INPUT ANSWER
+========================================= */
+
+function checkInputAnswer() {
+
+    if (answered) return;
+
+    const input =
+        document.getElementById("answerInput");
+
+    const value =
+        Number(input.value);
+
+    if (input.value.trim() === "") {
+
+        document.getElementById("feedback").textContent =
+            "Enter an answer first.";
+
+        return;
+    }
+
+    answered = true;
+
+    if (value === currentAnswer) {
+
+        correctAnswer();
+
+    } else {
+
+        wrongAnswer();
+
+    }
+}
+
+
+/* =========================================
+   CORRECT ANSWER
+========================================= */
+
+function correctAnswer() {
+
+    const bonus = streak * 5;
+    const points = 100 + bonus;
+
+    score += points;
+    xp += points;
+
+    streak++;
+
+    updateStats();
+
+    const feedback =
+        document.getElementById("feedback");
+
+    feedback.textContent =
+        "✓ Correct! +" + points + " XP";
+
+    feedback.className =
+        "feedback correct-text";
+
+    document.getElementById("nextButton").style.display =
+        "block";
+
+    if (currentLevel === 4) {
+
+        document.getElementById("nextButton").textContent =
+            "SEE RESULTS →";
+
+    }
+}
+
+
+/* =========================================
+   WRONG ANSWER
+========================================= */
+
+function wrongAnswer() {
+
+    lives--;
+    streak = 0;
+
+    updateStats();
+
+    const feedback =
+        document.getElementById("feedback");
+
+    feedback.textContent =
+        "✕ Not quite. The correct answer was " +
+        formatAnswer(currentAnswer) + ".";
+
+    feedback.className =
+        "feedback wrong-text";
+
+    if (lives <= 0) {
+
+        setTimeout(function() {
+
+            showResults(false);
+
+        }, 900);
+
+        return;
+    }
+
+    document.getElementById("nextButton").style.display =
+        "block";
+
+    if (currentLevel === 4) {
+
+        document.getElementById("nextButton").textContent =
+            "SEE RESULTS →";
+
+    }
+}
+
+
+/* =========================================
+   FORMAT ANSWER
+========================================= */
+
+function formatAnswer(answer) {
+
+    if (answer === 5) return "5 cm";
+
+    if (answer === 13) return "13";
+
+    if (answer === 10) return "10";
+
+    if (answer === 17) return "17";
+
+    if (answer === 15) return "15";
+
+    if (answer === 12) return "12";
+
+    if (answer === 24) return "24";
+
+    if (answer === 25) return "25";
+
+    if (answer === "a²+b²=c²")
+        return "a² + b² = c²";
+
+    return answer;
+
+}
+
+
+/* =========================================
+   NEXT LEVEL
+========================================= */
+
+function nextLevel() {
+
+    if (currentLevel >= 4) {
+
+        showResults(true);
+
+        return;
+    }
+
+    currentLevel++;
+
+    loadLevel();
+
+}
+
+
+/* =========================================
+   UPDATE STATS
+========================================= */
+
+function updateStats() {
+
+    document.getElementById("lives").textContent =
+        lives;
+
+    document.getElementById("xp").textContent =
+        xp;
+
+    document.getElementById("streak").textContent =
+        streak;
+
+    document.getElementById("scoreText").textContent =
+        "SCORE: " + score;
+
+}
+
+
+/* =========================================
+   RESULTS
+========================================= */
+
+function showResults(victory) {
+
+    document.getElementById("gameScreen")
+        .classList.remove("active");
+
+    document.getElementById("resultScreen")
+        .classList.add("active");
+
+    document.getElementById("finalScore")
+        .textContent = score;
+
+    if (victory) {
+
+        document.getElementById("resultEmoji")
+            .textContent = "🏆";
+
+        document.getElementById("resultTitle")
+            .textContent = "Quest Complete!";
+
+        document.getElementById("resultMessage")
+            .textContent =
+            "You conquered the four levels of the Triangle Quest. Pythagoras would approve.";
+
+    } else {
+
+        document.getElementById("resultEmoji")
+            .textContent = "📐";
+
+        document.getElementById("resultTitle")
+            .textContent = "Game Over";
+
+        document.getElementById("resultMessage")
+            .textContent =
+            "The triangles won this round. Try again and beat your score.";
+
+    }
+
+}
+
+
+/* =========================================
+   RESTART
+========================================= */
+
+function restartGame() {
+
+    document.getElementById("resultScreen")
+        .classList.remove("active");
+
+    document.getElementById("startScreen")
+        .classList.add("active");
+
+}
+
+</script>
+
+</body>
+</html>
